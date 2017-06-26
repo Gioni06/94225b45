@@ -1,0 +1,47 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "browsers": [
+            "last 2 versions",
+            "safari >= 7",
+            "ios_saf >= 8",
+            "not IE <= 10",
+            "chrome >= 49",
+            "firefox >= 49",
+            "> 1%"
+          ]
+        },
+        "modules": false
+      }
+    ],
+    "es2015",
+    "react",
+    "stage-0"
+  ],
+  "env": {
+    "test": {
+      "presets": [
+        [
+          "env",
+          {
+            "targets": {
+              "browsers": [
+                "last 2 versions",
+                "safari >= 7",
+                "ios_saf >= 8",
+                "not IE <= 10",
+                "chrome >= 49",
+                "firefox >= 49",
+                "> 1%"
+              ]
+            }
+          }
+        ]
+      ]
+    }
+  },
+  "plugins": []
+}
