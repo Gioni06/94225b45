@@ -4,6 +4,8 @@ import Dialog from 'material-ui/Dialog';
 import {grey900} from 'material-ui/styles/colors';
 import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
+import Avatar from 'material-ui/Avatar';
+import Divider from 'material-ui/Divider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import io from 'socket.io-client';
@@ -14,15 +16,12 @@ import {
   updateScreenNameAction,
   updateMessageAction,
   sendMessageAction,
-  receiveMessageAction
+  receiveMessageAction,
+  receiveSocketId
   } from '../store/actions';
 
-const styles = {
-  container: {
-    textAlign: 'center',
-    paddingTop: 200,
-  },
-};
+import {Wrapper, InputWrapper, ContentWrapper} from '../layouts/structure/wrapper';
+import {List, ListItem, ScreenName} from '../layouts/elements/list';
 
 const muiTheme = getMuiTheme({
   palette: {
@@ -38,9 +37,15 @@ class Main extends Component {
   componentDidMount() {
     this.props.socketConnectedAction()
     this.socket = connectSocket(window.location.origin);
+
     this.socket.on('msg_received', (message) => {
         console.log('message incomming..')
         this.props.receiveMessageAction(message)
+    })
+
+    this.socket.on('id_received', (id) => {
+        console.log('socket id incomming..')
+        this.props.receiveSocketId(id)
     })
   }
 
@@ -49,7 +54,7 @@ class Main extends Component {
   }
 
   handleMessage(event) {
-    this.props.updateMessageAction(event.target.value || 'anonymous')
+    this.props.updateMessageAction(event.target.value)
   }
 
   handleClick() {
@@ -58,15 +63,16 @@ class Main extends Component {
 
   render() {
     let chatMessages = this.props.chat.map((msg) =>
-      <li key={msg.id}>{msg.screenName}: {msg.msg}</li>
+       <ListItem key={msg.id} owner={this.props.id === msg.user}>{msg.msg} <ScreenName owner={this.props.id === msg.user}>{msg.screenName}</ScreenName></ListItem>
     );
 
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
-        <div style={styles.container}>
-          <h1>Material-UI Chat App</h1>
+        <Wrapper>
+          <ContentWrapper>
+            <h1>Material-UI Chat App</h1>
           <h2>Simple Chat App</h2>
-          <section>
+          <InputWrapper>
             <TextField
               hintText="Screen Name"
               floatingLabelText="Your screen name"
@@ -84,17 +90,18 @@ class Main extends Component {
               value={this.props.message.msg}
             />
 
-          </section>
+          </InputWrapper>
           <RaisedButton
             label="Test"
             secondary={true}
             onClick={this.handleClick.bind(this)}
             disabled={this.props.message.msg === ''}
           />
-          <ul>
+          <List>
             {chatMessages}
-          </ul>
-        </div>
+          </List>
+          </ContentWrapper>
+        </Wrapper>
       </MuiThemeProvider>
     );
   }
@@ -104,7 +111,8 @@ const mapStateToProps = (state) => {
   return {
     message: state.message,
     chat: state.chat,
-    connected: state.connected
+    connected: state.connected,
+    id: state.id
   }
 }
 
@@ -124,6 +132,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     sendMessageAction: (msg, ws) => {
       dispatch(sendMessageAction(msg, ws))
+    },
+    receiveSocketId: (id) => {
+      dispatch(receiveSocketId(id))
     }
   }
 }

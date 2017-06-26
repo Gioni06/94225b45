@@ -4,6 +4,7 @@ export const ActionTypes = {
     RESET_MESSAGE: 'MESSAGE:RESET_MESSAGE',
     SEND_MESSAGE: 'MESSAGE:SEND_MESSAGE',
     RECEIVE_MESSAGE: 'CHAT:RECEIVE_MESSAGE',
+    RECEIVE_ID: 'SOCKET:RECEIVE_ID',
     SOCKET_CONNECTED: 'SOCKET:CONNECTED'
 }
 
@@ -49,7 +50,7 @@ export const socketConnectedAction = () => {
  * @param {*Object<{screenName: String, msg: String}} message 
  */
 export const sendMessageAction = (message, ws) => {
-    ws.emit('test', message)
+    ws.emit('msg_send', message)
     console.log('message transmitted...')
     return dispatch => {
         return {
@@ -81,13 +82,9 @@ export const handleMessageAction = (msg) => {
     }
 }
 
-export const listenForMessages = (ws) => {
-    ws.on('msg_received', (message) => {
-        console.log('message incomming..')
-        return dispatch => {
-            return {
-                receiveMessageAction: dispatch(receiveMessageAction(message))
-            }
-        }
-    })
+export const receiveSocketId = (id) => {
+    return {
+        type: ActionTypes.RECEIVE_ID,
+        payload: id
+    }
 }
