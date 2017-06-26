@@ -1,7 +1,3 @@
-/**
- * In this file, we create a React component
- * which incorporates components provided by Material-UI.
- */
 import React, {Component} from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import Dialog from 'material-ui/Dialog';
@@ -12,6 +8,14 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import io from 'socket.io-client';
 import { connect } from 'react-redux';
+import { connectSocket } from '../store/connection'
+import { 
+  socketConnectedAction,
+  updateScreenNameAction,
+  updateMessageAction,
+  sendMessageAction,
+  receiveMessageAction
+  } from '../store/actions';
 
 const styles = {
   container: {
@@ -29,64 +33,33 @@ const muiTheme = getMuiTheme({
 class Main extends Component {
   constructor(props, context) {
     super(props, context);
-    this.socket = io(location.origin)
-    const message = {
-      screenName:'',
-      msg:''
-    }
-    const chat = [];
-
-    this.state = { message, chat }
   }
 
   componentDidMount() {
-    this.socket.on('msg_received', (msg) => {
-      console.log(msg)
-      let chat = this.state.chat;
-
-      chat.push(msg);
-      this.setState({
-        message: this.state.message, chat
-      })
+    this.props.socketConnectedAction()
+    this.socket = connectSocket(window.location.origin);
+    this.socket.on('msg_received', (message) => {
+        console.log('message incomming..')
+        this.props.receiveMessageAction(message)
     })
   }
 
   handleScreenName(event) {
-    const message = this.state.message
-    message.screenName = event.target.value;
-    this.setState({
-      message
-    })
+    this.props.updateScreenNameAction(event.target.value)
   }
 
   handleMessage(event) {
-    console.log(event)
-    let message = this.state.message
-    message.msg = event.target.value;
-    message.screenName = this.state.message.screenName || 'anonymous';
-    this.setState({
-      message
-    })
+    this.props.updateMessageAction(event.target.value || 'anonymous')
   }
 
   handleClick() {
-    console.log('clicked')
-    const message = this.state.message;
-    this.socket.emit('test', message)
-    this.setState({
-      message: {
-        screenName: message.screenName,
-        msg: ''
-      }
-    })
+    this.props.sendMessageAction({screenName: this.props.message.screenName, msg: this.props.message.msg},this.socket)
   }
 
   render() {
-    let chatMessages = this.state.chat.map((msg) =>
-      <li>{msg.screenName}: {msg.msg}</li>
+    let chatMessages = this.props.chat.map((msg) =>
+      <li key={msg.id}>{msg.screenName}: {msg.msg}</li>
     );
-
-    console.log(chatMessages);
 
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
@@ -99,7 +72,7 @@ class Main extends Component {
               floatingLabelText="Your screen name"
               floatingLabelFixed={true}
               onChange={this.handleScreenName.bind(this)}
-              value={this.state.message.screenName}
+              value={this.props.message.screenName}
             />
             <TextField
               hintText="Message"
@@ -108,7 +81,7 @@ class Main extends Component {
               multiLine={true}
               rows={1}
               onChange={this.handleMessage.bind(this)}
-              value={this.state.message.msg}
+              value={this.props.message.msg}
             />
 
           </section>
@@ -116,7 +89,7 @@ class Main extends Component {
             label="Test"
             secondary={true}
             onClick={this.handleClick.bind(this)}
-            disabled={this.state.message.msg === ''}
+            disabled={this.props.message.msg === ''}
           />
           <ul>
             {chatMessages}
@@ -128,10 +101,30 @@ class Main extends Component {
 }
 
 const mapStateToProps = (state) => {
-  return state
+  return {
+    message: state.message,
+    chat: state.chat,
+    connected: state.connected
+  }
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return {}
+  return {
+    socketConnectedAction: () => {
+      dispatch(socketConnectedAction())
+    },
+    receiveMessageAction: (msg) => {
+      dispatch(receiveMessageAction(msg))
+    },
+    updateScreenNameAction: (val) => {
+      dispatch(updateScreenNameAction(val))
+    },
+    updateMessageAction: (val) => {
+      dispatch(updateMessageAction(val))
+    },
+    sendMessageAction: (msg, ws) => {
+      dispatch(sendMessageAction(msg, ws))
+    }
+  }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Main);

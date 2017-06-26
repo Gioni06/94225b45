@@ -21,8 +21,8 @@ export const rootReducer = (state = initialState, action) => {
             return state; 
         case ActionTypes.SOCKET_CONNECTED:
             return { ...state, connected: true}  
-        case ActionTypes.REVEIVE_MESSAGE:
-            return { ...state, chat: this.state.push(action.payload)}    
+        case ActionTypes.RECEIVE_MESSAGE:
+            return { ...state, chat: [...state.chat, action.payload]}    
         default:
             return state                      
     }

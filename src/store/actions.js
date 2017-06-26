@@ -3,7 +3,7 @@ export const ActionTypes = {
     UPDATE_MESSAGE: 'MESSAGE:UPDATE_MESSAGE',
     RESET_MESSAGE: 'MESSAGE:RESET_MESSAGE',
     SEND_MESSAGE: 'MESSAGE:SEND_MESSAGE',
-    REVEIVE_MESSAGE: 'CHAT:REVEIVE_MESSAGE',
+    RECEIVE_MESSAGE: 'CHAT:RECEIVE_MESSAGE',
     SOCKET_CONNECTED: 'SOCKET:CONNECTED'
 }
 
@@ -50,26 +50,44 @@ export const socketConnectedAction = () => {
  */
 export const sendMessageAction = (message, ws) => {
     ws.emit('test', message)
+    console.log('message transmitted...')
     return dispatch => {
-        return dispatch(resetMessageAction)
+        return {
+            resetMessageAction: dispatch(resetMessageAction())
+        }
     }
 }
 
 /**
  * 
- * @param {*Object<{screenName: String, msg: String}} message 
+ * @param {*Object<{screenName: String, msg: String, id: String}} message 
  */
 export const receiveMessageAction = (message) => {
+    return dispatch => {
+        return {
+            receiveMessageAction : dispatch(handleMessageAction(message))
+        }
+    }
+}
+
+/**
+ * 
+ * @param {*Object<{screenName: String, msg: String, id: String}} message 
+ */
+export const handleMessageAction = (msg) => {
     return {
-        type: ActionTypes.REVEIVE_MESSAGE,
-        payload: message
+        type: ActionTypes.RECEIVE_MESSAGE,
+        payload: msg
     }
 }
 
 export const listenForMessages = (ws) => {
-    ws.on('chat', (message) => {
+    ws.on('msg_received', (message) => {
+        console.log('message incomming..')
         return dispatch => {
-            return receiveMessageAction(message)
+            return {
+                receiveMessageAction: dispatch(receiveMessageAction(message))
+            }
         }
     })
 }

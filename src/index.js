@@ -12,19 +12,18 @@ injectTapEventPlugin();
 
 
 (() => {
-  if (process.env.NODE_ENV === 'development' && module.hot) {
-    module.hot.accept();
-    render(
-      <Provider store={store}>
+  render(
+    <Provider store={store}>
         <App />
-      </Provider>  
+      </Provider>
     , document.getElementById('app'));
-  } else {
+
+  store.subscribe(() => {
     render(
     <Provider store={store}>
         <App />
       </Provider>
     , document.getElementById('app'));
-  }
+  })
 })()
 
