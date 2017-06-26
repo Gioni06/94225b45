@@ -92,7 +92,7 @@ class Main extends Component {
 
           </InputWrapper>
           <RaisedButton
-            label="Test"
+            label="Send Message"
             secondary={true}
             onClick={this.handleClick.bind(this)}
             disabled={this.props.message.msg === ''}
