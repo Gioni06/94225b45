@@ -3,8 +3,7 @@ const webpack = require('webpack');
 const helpers = require('./helpers');
 module.exports = {
   entry: {
-    bundle: ['webpack-hot-middleware/client', helpers.root('src')],
-    //client: helpers.root('src/index.js'),
+    bundle: ['webpack-hot-middleware/client', helpers.root('src')]
   },
   output: {
     path: helpers.root('src'),

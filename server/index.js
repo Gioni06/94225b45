@@ -11,7 +11,6 @@ import { ServerStyleSheet } from 'styled-components';
 import Home from '../src/components/home.component';
 import SocketIo from 'socket.io'
 import socketEvents from './socket.events'
-//import webpack from 'webpack';
 
 const app = express();
 const environment = process.env.NODE_ENV || 'production';
@@ -21,7 +20,6 @@ const hbs = exphbs.create({
   defaultLayout: 'main',
   layoutsDir: path.resolve(__dirname, '../server/views/layouts'),
   extname: '.handlebars',
-  // Specify helpers which are only registered on this instance.
   helpers: {
     json: function(obj) {
       return JSON.stringify(obj, null, 3);
